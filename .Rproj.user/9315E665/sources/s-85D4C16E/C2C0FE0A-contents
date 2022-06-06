@@ -28,9 +28,64 @@ group_by(origin_airport_name) %>%
   ggplot() +
   aes(x = origin_airport_name, fill = dep_delay_bool) +
   geom_bar()
+
 ```
 significant delays all round, more delays in newark but more flights total.
 there seems to be no imbalance
+
+
+```{r}
+clean_data %>% 
+  filter(origin_airport_name == "Newark Liberty International Airport") %>%
+  ggplot() +
+  aes(x = POSIXct_local_time, y = dep_delay) +
+  geom_bin2d() + 
+  coord_cartesian(ylim = c(-100, 1600)) +
+  labs(title = "NEWARK AIRPORT", x = "Date", y = "Total Delay")
+
+clean_data %>% 
+  filter(origin_airport_name == "John F Kennedy International Airport") %>%
+  ggplot() +
+  aes(x = POSIXct_local_time, y = dep_delay) +
+  geom_bin2d()+ 
+  coord_cartesian(ylim = c(-100, 1600)) +
+  labs(title = "JFK AIRPORT", x = "Date", y = "Total Delay")
+
+clean_data %>% 
+  filter(origin_airport_name == "La Guardia Airport") %>%
+  ggplot() +
+  aes(x = POSIXct_local_time, y = dep_delay) +
+  geom_bin2d()+ 
+  coord_cartesian(ylim = c(-100, 1600)) +
+  labs(title = "GUARDIA AIRPORT", x = "Date", y = "Total Delay")
+```
+
+
+```{r}
+clean_data %>% 
+  filter(origin_airport_name == "Newark Liberty International Airport") %>%
+  ggplot() +
+  aes(x = POSIXct_local_time, y = dep_delay) +
+  geom_point() + 
+  coord_cartesian(ylim = c(-100, 1600)) +
+  labs(title = "NEWARK AIRPORT", x = "Date", y = "Total Delay")
+
+clean_data %>% 
+  filter(origin_airport_name == "John F Kennedy International Airport") %>%
+  ggplot() +
+  aes(x = POSIXct_local_time, y = dep_delay) +
+  geom_point()+ 
+  coord_cartesian(ylim = c(-100, 1600)) +
+  labs(title = "JFK AIRPORT", x = "Date", y = "Total Delay")
+
+clean_data %>% 
+  filter(origin_airport_name == "La Guardia Airport") %>%
+  ggplot() +
+  aes(x = POSIXct_local_time, y = dep_delay) +
+  geom_point()+ 
+  coord_cartesian(ylim = c(-100, 1600)) +
+  labs(title = "GUARDIA AIRPORT", x = "Date", y = "Total Delay")
+```
 
 
 ```{r}
@@ -78,13 +133,6 @@ ggplot(aes(x = hour, y = count, fill = delays)) + geom_bar(stat='identity')
 
 flights have a higher cancellation rate after midday and delays became more frequent after 3pm.
 
-```{r}
-clean_data %>% 
-  ggplot() +
-  aes(x = POSIXct_local_time, y = dep_delay) +
-  geom_bin2d()
-```
-
 
 
 ```{r}
@@ -97,4 +145,15 @@ clean_data %>%
   select(dep_delay, origin_airport_alt, temp, dew_bool, humid, precip, wind_speed, wind_gust, visib) %>%
 ggpairs()
 ```
+
+```{r}
+
+clean_data %>%
+  select(dep_delay, POSIXct_hour, seats, speed, temp, dewp, humid, precip, wind_speed, wind_gust, pressure, visib, distance) %>%
+cor(method = "pearson", use = "complete.obs")
+
+```
+
+
+
 

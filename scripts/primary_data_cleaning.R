@@ -82,7 +82,8 @@ select("flight",
        "cancelled",
        
        "air_time",
-       "distance"
+       "distance",
+       "POSIXct_hour"
 ) %>%
   arrange(POSIXct_local_time)
 
