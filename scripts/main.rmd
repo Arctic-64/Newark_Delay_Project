@@ -7,6 +7,8 @@ output: html_notebook
 library(tidyverse)
 library(here)
 library(ggplot2)
+library(lubridate)
+library(GGally)
 ```
 
 create clean data
@@ -30,26 +32,69 @@ group_by(origin_airport_name) %>%
 significant delays all round, more delays in newark but more flights total.
 there seems to be no imbalance
 
+
+```{r}
+clean_data %>%
+group_by(airline_name) %>% 
+  ggplot() +
+  aes(y = airline_name, fill = dep_delay_bool) +
+  geom_bar()
+
+clean_data %>%
+
+```
+
+
 delay analysis over time
 ```{r}
 clean_data %>%
   ggplot() +
-  geom_histogram(aes(x = POSIXct_time, fill = dep_delay_bool), bins = 24)
+  geom_histogram(aes(x = POSIXct_local_time, fill = dep_delay_bool), bins = 24)
 ```
 delays seem more frequent from march to august
 
 by day analysis
 ```{r}
 clean_data %>%
-group_by(POSIXct_day) %>% 
-  ggplot() +
-  aes(x = POSIXct_day, fill = dep_delay_bool) +
-  geom_bar()
+    group_by(day = weekdays(POSIXct_local_time), delays =dep_delay_bool) %>%
+    summarize(count = n()) %>%
+    mutate(days = factor(day, levels = c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"))) %>%
+  
+ggplot(aes(x = days, y = count, fill = delays)) + geom_bar(stat='identity', position = "dodge")
+
 ```
+no obvious increase in delays by day but a reduced overall volume on saterday.
+
+
 
 ```{r}
 clean_data %>%
-  group_by(dep_delay_bool, origin_airport_name) %>%
-  summarise(n())
+    group_by(hour = hour(POSIXct_local_time), delays =dep_delay_bool) %>%
+    summarize(count = n()) -> by_day
+
+by_day%>%
+ggplot(aes(x = hour, y = count, fill = delays)) + geom_bar(stat='identity')
+```
+
+flights have a higher cancellation rate after midday and delays became more frequent after 3pm.
+
+```{r}
+clean_data %>% 
+  ggplot() +
+  aes(x = POSIXct_local_time, y = dep_delay) +
+  geom_bin2d()
+```
+
+
+
+```{r}
+clean_data %>%
+  select(dep_delay, manufacture_year, type, seats, engine, engines) %>%
+ggpairs()
+```
+```{r}
+clean_data %>%
+  select(dep_delay, origin_airport_alt, temp, dew_bool, humid, precip, wind_speed, wind_gust, visib) %>%
+ggpairs()
 ```
 

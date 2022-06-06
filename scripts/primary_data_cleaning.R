@@ -27,11 +27,14 @@ left_join(airports, by = c("dest" = "faa")) %>%
   mutate(arr_delay = ifelse(is.na(arr_delay), arr_time - sched_arr_time, arr_delay)) %>%
   mutate(dep_delay_bool = ifelse(dep_delay > 0, TRUE, FALSE)) %>%
   mutate(arr_delay_bool = ifelse(arr_delay > 0, TRUE, FALSE)) %>%
-  mutate(cancelled = ifelse(is.na(arr_delay_bool | dep_delay_bool), 1, 0)) %>%
-select( "flight",
-        "tailnum",
-        "airline_name",
-        "POSIXct_time",
+  mutate(cancelled = ifelse(is.na(arr_delay_bool | dep_delay_bool), TRUE, FALSE)) %>%
+  mutate(POSIXct_local_time = as.POSIXct(paste(paste(POSIXct_year, POSIXct_month, POSIXct_day, sep = "-"), 
+                                               paste(POSIXct_hour, POSIXct_minute, sep = ":"), sep = " ")), 
+                                                tz="EDT",format="%Y-%m-%d %H:%M") %>%
+select("flight",
+       "tailnum",
+       "airline_name",
+       "POSIXct_local_time",
        
        "manufacturer",
        "manufacture_year",
@@ -78,16 +81,10 @@ select( "flight",
        
        "cancelled",
        
-       "POSIXct_year",
-       "POSIXct_month",
-       "POSIXct_day",
-       "POSIXct_hour",
-       "POSIXct_minute",
-       
        "air_time",
        "distance"
 ) %>%
-  arrange(POSIXct_year, POSIXct_month, POSIXct_day, POSIXct_hour, POSIXct_minute)
+  arrange(POSIXct_local_time)
 
 write.csv(compiled, here("clean_data\\primary_clean_data.csv"), row.names = FALSE)
 
