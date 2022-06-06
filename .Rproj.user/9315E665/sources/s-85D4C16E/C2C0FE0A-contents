@@ -1,0 +1,55 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(tidyverse)
+library(here)
+library(ggplot2)
+```
+
+create clean data
+```{r}
+source(here("scripts/primary_data_cleaning.R"))
+```
+
+load clean data
+```{r}
+clean_data <- read_csv(here("clean_data/primary_clean_data.csv"), show_col_types = FALSE)
+```
+
+basic delay data
+```{r}
+clean_data %>%
+group_by(origin_airport_name) %>% 
+  ggplot() +
+  aes(x = origin_airport_name, fill = dep_delay_bool) +
+  geom_bar()
+```
+significant delays all round, more delays in newark but more flights total.
+there seems to be no imbalance
+
+delay analysis over time
+```{r}
+clean_data %>%
+  ggplot() +
+  geom_histogram(aes(x = POSIXct_time, fill = dep_delay_bool), bins = 24)
+```
+delays seem more frequent from march to august
+
+by day analysis
+```{r}
+clean_data %>%
+group_by(POSIXct_day) %>% 
+  ggplot() +
+  aes(x = POSIXct_day, fill = dep_delay_bool) +
+  geom_bar()
+```
+
+```{r}
+clean_data %>%
+  group_by(dep_delay_bool, origin_airport_name) %>%
+  summarise(n())
+```
+

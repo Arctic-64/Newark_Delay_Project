@@ -1,0 +1,13 @@
+clean data with an R script.
+
+intergrate python into R or vice versa, master slave control program
+
+basica statistical analysis (R)
+
+informs
+
+descision tree classification (python)
+
+informs
+
+tensorflow neural net predictive model (python: EXPERIMENTAL)
