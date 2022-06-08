@@ -1,0 +1,388 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+
+library(MASS)
+library(tidyverse)
+library(here)
+library(ggplot2)
+library(lubridate)
+library(GGally)
+library(caret)
+library(Amelia)
+
+```
+
+create clean data
+```{r}
+source(here("scripts/primary_data_cleaning.R"))
+```
+
+load clean data
+```{r}
+clean_data <- read_csv(here("clean_data/primary_clean_data.csv"), show_col_types = FALSE)
+```
+
+basic delay data
+```{r}
+clean_data %>%
+group_by(origin_airport_name) %>% 
+  ggplot() +
+  aes(x = origin_airport_name, fill = dep_delay_bool) +
+  geom_bar() +
+  labs(x = "NYC Airport",
+y = "Flights",
+title = "Flights Per NYC Airport",
+fill = "Delay") +
+  scale_fill_manual(labels = c("on_time", "delayed"), values = c("steelblue", "maroon")) +
+  theme_bw()
+
+
+```
+significant delays all round, more delays in newark but more flights total.
+there seems to be no imbalance
+
+```{r}
+clean_data %>%
+  select(origin_airport_name, dep_delay_bool) %>%
+  na.omit() %>%
+group_by(origin_airport_name) %>%
+  summarise(percentage_delay = sum(dep_delay_bool)/n()*100)
+```
+
+
+
+```{r}
+clean_data %>% 
+  filter(origin_airport_name == "Newark Liberty International Airport") %>%
+  ggplot() +
+  aes(x = POSIXct_local_time, y = dep_delay) +
+  geom_bin2d() + 
+  coord_cartesian(ylim = c(-100, 1600)) +
+  labs(title = "NEWARK AIRPORT", x = "Date", y = "Total Delay")
+
+clean_data %>% 
+  filter(origin_airport_name == "John F Kennedy International Airport") %>%
+  ggplot() +
+  aes(x = POSIXct_local_time, y = dep_delay) +
+  geom_bin2d()+ 
+  coord_cartesian(ylim = c(-100, 1600)) +
+  labs(title = "JFK AIRPORT", x = "Date", y = "Total Delay")
+
+clean_data %>% 
+  filter(origin_airport_name == "La Guardia Airport") %>%
+  ggplot() +
+  aes(x = POSIXct_local_time, y = dep_delay) +
+  geom_bin2d()+ 
+  coord_cartesian(ylim = c(-100, 1600)) +
+  labs(title = "GUARDIA AIRPORT", x = "Date", y = "Total Delay")
+```
+
+
+```{r}
+clean_data %>% 
+  filter(origin_airport_name == "Newark Liberty International Airport") %>%
+  ggplot() +
+  aes(x = POSIXct_local_time, y = dep_delay) +
+  geom_point() + 
+  coord_cartesian(ylim = c(-100, 1600)) +
+  labs(title = "NEWARK AIRPORT", x = "Date", y = "Total Delay")
+
+clean_data %>% 
+  filter(origin_airport_name == "John F Kennedy International Airport") %>%
+  ggplot() +
+  aes(x = POSIXct_local_time, y = dep_delay) +
+  geom_point()+ 
+  coord_cartesian(ylim = c(-100, 1600)) +
+  labs(title = "JFK AIRPORT", x = "Date", y = "Total Delay")
+
+clean_data %>% 
+  filter(origin_airport_name == "La Guardia Airport") %>%
+  ggplot() +
+  aes(x = POSIXct_local_time, y = dep_delay) +
+  geom_point()+ 
+  coord_cartesian(ylim = c(-100, 1600)) +
+  labs(title = "GUARDIA AIRPORT", x = "Date", y = "Total Delay")
+```
+
+
+```{r}
+clean_data %>%
+group_by(airline_name) %>% 
+  ggplot() +
+  aes(y = airline_name, fill = dep_delay_bool) +
+  geom_bar()
+
+```
+
+
+delay analysis over time
+```{r}
+clean_data %>%
+  ggplot() +
+  geom_histogram(aes(x = POSIXct_local_time, fill = dep_delay_bool), bins = 24) +
+  labs(x = "DATE",
+y = "Flights",
+title = "2017_NYC_Flights",
+fill = "Delay") +
+  scale_fill_manual(labels = c("on_time", "delayed"), values = c("steelblue", "maroon")) +
+  theme_bw()
+```
+delays seem more frequent from march to august
+
+by day analysis
+```{r}
+clean_data %>%
+    group_by(day = weekdays(POSIXct_local_time), delays =dep_delay_bool) %>%
+    summarize(count = n()) %>%
+    mutate(days = factor(day, levels = c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"))) %>%
+  
+ggplot(aes(x = days, y = count, fill = delays)) + geom_bar(stat='identity', position = "dodge") +
+  labs(x = "Day",
+y = "Flights",
+title = "Flights Per day",
+fill = "Delay") +
+  scale_fill_manual(labels = c("on_time", "delayed"), values = c("steelblue", "maroon")) +
+  theme_bw()
+
+```
+no obvious increase in delays by day but a reduced overall volume on saterday.
+
+
+
+```{r}
+clean_data %>%
+    group_by(hour = hour(POSIXct_local_time), delays =dep_delay_bool) %>%
+    summarize(count = n()) -> by_day
+
+by_day%>%
+ggplot(aes(x = hour, y = count, fill = delays)) + geom_bar(stat='identity') +
+  labs(x = "Hour",
+y = "Flights",
+title = "Flights Per hour",
+fill = "Delay") +
+  scale_fill_manual(labels = c("on_time", "delayed"), values = c("steelblue", "maroon")) +
+  theme_bw()
+```
+
+flights have a higher cancellation rate after midday and delays became more frequent after 3pm.
+
+
+
+```{r}
+clean_data %>%
+    select(dep_delay_bool, POSIXct_local_time) %>%
+    na.omit() %>%
+    group_by(hour = hour(POSIXct_local_time)) %>%
+    summarize(prcnt_delays = sum(dep_delay_bool)/n()*100) -> by_day_line
+
+by_day_line%>%
+ggplot(aes(x = hour, y = prcnt_delays)) + geom_bar(stat='identity')
+```
+
+
+```{r}
+sapply(names(clean_data), function(x){mean(is.na(clean_data[[x]]))})
+```
+
+```{r}
+missmap(clean_data,  rank.order = TRUE)
+```
+
+
+
+```{r}
+clean_data_f = clean_data %>%
+  select("flight",
+       "tailnum",
+       "airline_name",
+       "POSIXct_local_time",
+       
+       "manufacturer",
+       "manufacture_year",
+       "model", 
+       "type", 
+       "seats",
+       "engine",
+       "engines",
+       "origin_airport_name",
+       "origin_airport_alt",
+       "origin_airport_tzone",
+       "wind_dir",
+       "wind_speed",
+       "wind_gust",
+       "visib",
+       
+       "sched_dep_time",
+       "dep_time",
+       "dep_delay",
+       "dep_delay_binary",
+       "dep_delay_bool",
+       "cancelled",
+       
+       "air_time",
+       "distance"
+       )
+```
+
+
+
+```{r}
+lm1 <- lm(dep_delay~wind_speed, clean_data_f)
+
+plot(lm1)
+
+summary(lm1)
+```
+
+
+```{r}
+wind_clean_data <- clean_data_f%>%
+  select(dep_delay_binary, wind_speed, visib, seats, engines, POSIXct_local_time) %>% na.omit() %>%
+  mutate(month = month(POSIXct_local_time))
+
+wind_clean_data %>%
+
+  group_by(month) %>%
+  summarise(wind_speed = mean(wind_speed)/max(wind_clean_data$wind_speed)*100, prcnt_flights_delayed = sum(dep_delay_binary)/length(dep_delay_binary)*100) %>%
+
+  
+  ggplot(aes( x = month)) +
+  geom_bar(aes(x = month, y = prcnt_flights_delayed), stat = "identity") +
+  geom_line(aes(x = month, y = wind_speed), stat = "identity") +
+  scale_x_discrete(limits = 1:12) +
+  labs(x = "DATE",
+y = "% flights delayed & % windspeed",
+title = "monthly delays & windspeed",
+fill = "Delay") +
+  scale_fill_manual(labels = c("on_time", "delayed"), values = c("steelblue", "maroon")) +
+  theme_bw()
+
+```
+
+
+
+
+
+
+```{r}
+
+wind_clean_data <- clean_data_f%>%
+  select(dep_delay_binary, wind_speed, visib, seats, engines, POSIXct_local_time) %>% na.omit() %>%
+  mutate(month = month(POSIXct_local_time))
+
+index = sort(sample(nrow(wind_clean_data), nrow(wind_clean_data)*0.8))
+
+train<-wind_clean_data[index,]
+nrow(train)
+test<-wind_clean_data[-index,]
+nrow(test)
+
+liniar_model <- glm(dep_delay_binary ~ wind_speed + visib + seats + engines, family = binomial(link = "logit"), data = train)
+
+
+summary(liniar_model)
+
+prediction <- predict(liniar_model, newdata = test, type = "response")
+head(prediction)
+prediction_binary <- factor(ifelse(prediction > 0.5, 1, 0))
+plot(liniar_model)
+confusionMatrix(prediction_binary, factor(test$dep_delay_binary))
+
+with(summary(liniar_model), 1 - deviance/null.deviance)
+```
+Accuracy : 0.6181   due to skewing of data
+
+0.005410407 r^2 variance explained by the model, very small.
+
+Confusion Matrix and Statistics
+
+          Reference
+Prediction     0     1
+         0 28317 17223
+         1   984  1155
+
+
+```{r}
+
+index = sort(sample(nrow(wind_clean_data), nrow(wind_clean_data)*0.8))
+
+train<-wind_clean_data[index,]
+nrow(train)
+test<-wind_clean_data[-index,]
+nrow(test)
+
+fit <- glm(dep_delay_binary ~ wind_speed, family = binomial(link = "logit"), data = train)
+
+result <- predict(fit, newdata=test, type="response")
+
+plot(fit)
+
+summary(fit)
+
+```
+
+
+```{r}
+
+clean_data_f %>%
+  filter(dep_delay_binary = TRUE) %>%
+  select(dep_delay, visib) %>%
+  na.omit() %>%
+  group_by(visib) %>%
+  summarise(avg_delay_count = mean(dep_delay)) -> vis_data
+
+vis_data
+
+vis_data %>%
+
+ggplot(aes(x = visib, y = avg_delay_count)) +
+geom_point() + 
+geom_smooth(method = "lm") +
+labs(x = "visibility (miles)",
+y = "avg delays (minutes)",
+title = "visibility delay relationship")
+
+```
+
+
+```{r}
+clean_data_f %>%
+  filter(dep_delay_bool = TRUE) %>%
+  select(dep_delay, seats) %>%
+  mutate(seats = factor(seats)) %>%
+  na.omit() %>%
+  group_by(seats) %>%
+  summarise(avg_delay_count = mean(dep_delay)) %>%
+  ggplot() +
+    geom_bar(aes(x = seats, y = avg_delay_count), stat = "identity")
+
+
+clean_data_f %>%
+    filter(dep_delay_bool = TRUE) %>%
+  select(dep_delay, seats) %>%
+  mutate(seats = factor(seats)) %>%
+  na.omit() %>%
+  group_by(seats) %>%
+  summarise(count = n()) %>%
+  ggplot() +
+    geom_bar(aes(x = seats, y = count), stat = "identity")
+
+```
+
+```{r}
+clean_data_f %>%
+  select(origin_airport_name, visib, POSIXct_local_time) %>%
+  mutate(month = month(POSIXct_local_time))%>%
+  na.omit() %>%
+  group_by(origin_airport_name) %>%
+  summarise(vis = mean(visib)) %>%
+  
+    ggplot() +
+    geom_bar(aes(y = vis, fill = origin_airport_name), stat = "identity")
+  
+```
+
