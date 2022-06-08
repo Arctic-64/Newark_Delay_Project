@@ -140,7 +140,13 @@ clean_data %>%
     summarize(count = n()) %>%
     mutate(days = factor(day, levels = c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"))) %>%
   
-ggplot(aes(x = days, y = count, fill = delays)) + geom_bar(stat='identity', position = "dodge")
+ggplot(aes(x = days, y = count, fill = delays)) + geom_bar(stat='identity', position = "dodge") +
+  labs(x = "Day",
+y = "Flights",
+title = "Flights Per day",
+fill = "Delay") +
+  scale_fill_manual(labels = c("on_time", "delayed"), values = c("steelblue", "maroon")) +
+  theme_bw()
 
 ```
 no obvious increase in delays by day but a reduced overall volume on saterday.
@@ -153,7 +159,13 @@ clean_data %>%
     summarize(count = n()) -> by_day
 
 by_day%>%
-ggplot(aes(x = hour, y = count, fill = delays)) + geom_bar(stat='identity')
+ggplot(aes(x = hour, y = count, fill = delays)) + geom_bar(stat='identity') +
+  labs(x = "Hour",
+y = "Flights",
+title = "Flights Per hour",
+fill = "Delay") +
+  scale_fill_manual(labels = c("on_time", "delayed"), values = c("steelblue", "maroon")) +
+  theme_bw()
 ```
 
 flights have a higher cancellation rate after midday and delays became more frequent after 3pm.
@@ -165,10 +177,10 @@ clean_data %>%
     select(dep_delay_bool, POSIXct_local_time) %>%
     na.omit() %>%
     group_by(hour = hour(POSIXct_local_time)) %>%
-    summarize(delays = sum(dep_delay_bool)/n()*100) -> by_day_line
+    summarize(prcnt_delays = sum(dep_delay_bool)/n()*100) -> by_day_line
 
 by_day_line%>%
-ggplot(aes(x = hour, y = delays)) + geom_bar(stat='identity')
+ggplot(aes(x = hour, y = prcnt_delays)) + geom_bar(stat='identity')
 ```
 
 
@@ -270,6 +282,8 @@ test<-wind_clean_data[-index,]
 nrow(test)
 
 liniar_model <- glm(dep_delay_binary ~ wind_speed + visib + seats + engines, family = binomial(link = "logit"), data = train)
+
+
 summary(liniar_model)
 
 prediction <- predict(liniar_model, newdata = test, type = "response")
@@ -359,4 +373,16 @@ clean_data_f %>%
 
 ```
 
+```{r}
+clean_data_f %>%
+  select(origin_airport_name, visib, POSIXct_local_time) %>%
+  mutate(month = month(POSIXct_local_time))%>%
+  na.omit() %>%
+  group_by(origin_airport_name) %>%
+  summarise(vis = mean(visib)) %>%
+  
+    ggplot() +
+    geom_bar(aes(y = vis, fill = origin_airport_name), stat = "identity")
+  
+```
 

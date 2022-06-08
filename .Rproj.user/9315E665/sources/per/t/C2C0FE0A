@@ -5,7 +5,7 @@
     "type": "r_markdown",
     "hash": "1134908672",
     "contents": "",
-    "dirty": true,
+    "dirty": false,
     "created": 1654390813632.0,
     "source_on_save": false,
     "relative_order": 1,
@@ -17,11 +17,11 @@
         "scrollLine": "374"
     },
     "folds": "",
-    "lastKnownWriteTime": 1654655550,
+    "lastKnownWriteTime": 1654658714,
     "encoding": "UTF-8",
     "collab_server": "",
     "source_window": "",
-    "last_content_update": 1654658476900,
+    "last_content_update": 1654658714404,
     "read_only": false,
     "read_only_alternatives": []
 }
