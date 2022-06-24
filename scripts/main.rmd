@@ -1,7 +1,29 @@
 ---
-title: "R Notebook"
+title: "Newark flight delays"
 output: html_notebook
 ---
+
+
+this is a study in collaboration with newark airport located in NYC
+there are 3 airports in this region.
+this will be both a comparative analysis on the performance of this airport versus its counterparts
+and also an analysis on natural phenomena that could be affecting the performance of the airport.
+
+specifically, the performance metric studdied in this analysis is the delay of flights, both in frequnancy and in magnitude.
+
+all airports had a similarly comparable rate of delays and asccociated magnitude of delays.
+however Newark airport appears to have slightly more delays as a percentage of total flights while also haveing a greater number of total flights when compared to the other two local NCY airports.
+
+increased traffic may explain the increase in delay proportion.
+
+weather data for this study was in incredibly short supply,
+the data for most relevant weather factors was missing to such an extent as to be useless and unreliable for this investigation.
+
+visibility was the only viable statistic for use.
+
+a correlation was discovered between the visibility and the magnitude of delays experienced within that visibility range.
+far visibility appears to reduce the probability that a flight will be delayed by a large margin.
+
 
 ```{r}
 
@@ -52,7 +74,7 @@ clean_data %>%
 group_by(origin_airport_name) %>%
   summarise(percentage_delay = sum(dep_delay_bool)/n()*100)
 ```
-
+there is an increase in delay percentage upon numerical analysis, however the gravity of this statistic is yet to be determined
 
 
 ```{r}
@@ -80,7 +102,7 @@ clean_data %>%
   coord_cartesian(ylim = c(-100, 1600)) +
   labs(title = "GUARDIA AIRPORT", x = "Date", y = "Total Delay")
 ```
-
+possible delay cluster spike in the summer, vast majority of delays are concentrated in the minor catagory across all airports
 
 ```{r}
 clean_data %>% 
@@ -107,7 +129,7 @@ clean_data %>%
   coord_cartesian(ylim = c(-100, 1600)) +
   labs(title = "GUARDIA AIRPORT", x = "Date", y = "Total Delay")
 ```
-
+identical plot with less granularity, no significant new information
 
 ```{r}
 clean_data %>%
@@ -117,7 +139,7 @@ group_by(airline_name) %>%
   geom_bar()
 
 ```
-
+no apparent significant delays by airline
 
 delay analysis over time
 ```{r}
@@ -131,7 +153,7 @@ fill = "Delay") +
   scale_fill_manual(labels = c("on_time", "delayed"), values = c("steelblue", "maroon")) +
   theme_bw()
 ```
-delays seem more frequent from march to august
+delays seem slightly more frequent from march to august supporting previous hipothosis
 
 by day analysis
 ```{r}
@@ -150,6 +172,8 @@ fill = "Delay") +
 
 ```
 no obvious increase in delays by day but a reduced overall volume on saterday.
+saterday also seems to have a reduced percentage of delays.
+reduced volume of flights could allow the airport to more easily manage delays.
 
 
 
@@ -182,7 +206,8 @@ clean_data %>%
 by_day_line%>%
 ggplot(aes(x = hour, y = prcnt_delays)) + geom_bar(stat='identity')
 ```
-
+an overall trend upward of delays by hour, this could indicate that the airport at 5AM has been reset overnight.
+as delays happen through the day the indirect effect of one could be the precursor to another.
 
 ```{r}
 sapply(names(clean_data), function(x){mean(is.na(clean_data[[x]]))})
@@ -191,7 +216,7 @@ sapply(names(clean_data), function(x){mean(is.na(clean_data[[x]]))})
 ```{r}
 missmap(clean_data,  rank.order = TRUE)
 ```
-
+most weather data missing, wind and visibility still viable
 
 
 ```{r}
@@ -262,9 +287,11 @@ fill = "Delay") +
   theme_bw()
 
 ```
+bars = delays
+line = wind speed
 
-
-
+possible correlation with wind speed, but not obvious enough to confirm, requires further research on more data.
+not accounting for human countermeasures already in place to reduce predicted delays due to predicted windspeed. 
 
 
 
@@ -333,7 +360,9 @@ clean_data_f %>%
   select(dep_delay, visib) %>%
   na.omit() %>%
   group_by(visib) %>%
-  summarise(avg_delay_count = mean(dep_delay)) -> vis_data
+  #summarise(avg_delay_count = mean(dep_delay)) -> vis_data
+  
+  summarise(avg_delay_count = dep_delay) -> vis_data
 
 vis_data
 
@@ -347,6 +376,9 @@ y = "avg delays (minutes)",
 title = "visibility delay relationship")
 
 ```
+long visibility seems to be a predictor for reduced delay magnitude.
+more apparent when plotted as an avarage of avarages however this may be misleading.
+while the data points seem to show a delay increase with longer visibility, the general trend of this distribution is slightly downward.
 
 
 ```{r}
@@ -372,17 +404,4 @@ clean_data_f %>%
     geom_bar(aes(x = seats, y = count), stat = "identity")
 
 ```
-
-```{r}
-clean_data_f %>%
-  select(origin_airport_name, visib, POSIXct_local_time) %>%
-  mutate(month = month(POSIXct_local_time))%>%
-  na.omit() %>%
-  group_by(origin_airport_name) %>%
-  summarise(vis = mean(visib)) %>%
-  
-    ggplot() +
-    geom_bar(aes(y = vis, fill = origin_airport_name), stat = "identity")
-  
-```
-
+certain seat number planes appear much more common indicating a set of plane sizes used for regular civilian transport.

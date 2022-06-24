@@ -1,0 +1,127 @@
+---
+title: "Newark flight delays project - PDA"
+output:
+  html_document:
+    toc: yes
+    toc_float: yes
+    df_print: paged
+    pdf_document: default
+  word_document:
+    toc: yes
+---
+
+## Context
+
+#### Business intelligence and data-driven decision making
+
+the insights provided by this report can show Newark airport times and situations where delays are likely to occur.
+this information can be used to apply extra resources to a particular area when required.
+
+#### Domain knowledge and the business context
+
+Newark airport is one of three airports operating in NYC. this analysis will allow Newark to Gage its performance to its rival airports and potentialy identify where improvements can be made.
+a core component of airport reputation is and performance indication is the number and magnitude of delays which this study will also investigate.
+
+## Data
+
+#### Internal and external data sources
+
+the data used in this study consisted of five data files data on the flights and planes was provided by Newark airport. a data set of airports was also used to map out destinations of flights and provide additional data on the airports in question.
+weather data was also obtained provideing weather data for the NYC area.
+a final airliner file was used to map airlines to airline codes used in the core dataset.
+
+#### Types of data
+
+the sum total of all data consisted of temporal time series data, location data, numerical statistic data and catagorical data.
+airline data was mainly catagorical while much of the weather data was provided in a numerical format.
+
+#### Data formats
+
+all data was obtained from CSV files localy.
+
+#### Data quality and bias
+
+the quality of the weather data used in this analysis was sub par.
+while some of the data was usable, a vast proportion of the weather data was missing at a rate of over 90% making imputation impossible.
+most weather statistics such as temperature, pressure and humidity were rendered unfit for use.
+
+## Ethics
+
+#### Ethical issues in data sourcing and extraction
+
+it is possible that a private plane could be included in this data unequally identified by its tail number.
+tracking of this aircraft could be carried out using this data allowing potential privacy violations for someone who may not wish to be found in a particular place.
+
+
+#### Ethical implications of business requirements
+
+this studdy seeks to improve the performance of newark airport through weather analysis to reduce delays and to gauge its current performance in relation to the two other airports operateing in NYC.
+this raises an ethical implication as the data in this report could reduce delays and therefor also reduce idle fuel consumption from planes awaiting takeoff for extended periods.
+this then constitutes an ecological concern as to the distribution of the findings.
+
+## Analysis
+
+#### Stages in the data analysis process
+
+first the data was cleaned and compiled.
+then the flights were broken down between all NYC airports.
+it was found that Newark airport had the most total flights out of the three by a significant margin.
+however, Newark airport also had the highest percentage of delays amoungh these flights.
+
+delays were then broken down by time, and it was found that an minour increase in delays were present from the month of April to july suggesting some summer congestion.
+
+more notable was the flight delays when broken down by day and hour.
+
+a much more significant reduction in delays was observed on saterdays and a very pronounced increase in delays was observed through the day.
+
+this hourly breakdown suggests that early delays could have a knock on effect and cause further delays to upcoming flights.
+
+wind speeds effect on flight delays was visualized but no obviously significant corrialtion was observed.
+
+while most weather data was missing, the visibility data was intact, and a correlation was detected between magnitude of delay and range of viability.
+so as the visibility decreased, the average delay magnitude increased.
+
+final, a logistic regression model was implemented achiveing a 61% accuracy on testing data.
+the R^2 vlaue for this model however was incredibly low meaning very little variance was explained by the predictor variables chosen.
+
+in conclusion, weather data has show some promise in the prediction of flight delays, however more complete data on other aspects of weathers impact on flights will be required.
+
+#### Tools for data analysis
+
+this analysis was conducted using the R programming language with the tidyverse library.
+lubricate was also implemented for easy manipulation of time series data.
+ggplot, Amelia, caret and MASS were also used to generate visualizations and implement logistic regression.
+
+#### Descriptive, diagnostic, predictive and prescriptive analysis
+
+this study would best be described as Descriptive and Prescriptive.
+data was processed to give an understanding of previous years in comparison to other competitors.
+
+and through understanding the past, logistic regression allowed prescriptive analysis to assess the passed data and identify trends and variables with a level of importance to allow better decisions to be made based on these data points to archive a more desirable outcome
+
+# PDA Outcomes
+
+### Working with Data (J4Y6 35)
+
+#### 1. Plan an analysis to provide business intelligence
+
+-   1.1 Business intelligence and data-driven decision making
+-   1.2 Domain knowledge and the business context
+-   1.4 Internal and external data sources
+-   1.5 Data quality
+-   1.6 Stages in the data analysis process
+-   1.7 Descriptive, diagnostic, predictive and prescriptive analysis
+-   1.9 Ethical implications of business requirements
+-   1.10 Tools for data analysis
+
+#### 2. Extract data from a variety of sources
+
+-   2.1 Tools for querying data sources
+-   2.2 Types of data (categorical and numerical data and their sub-types)
+-   2.3 Data formats
+-   2.6 Data quality including data bias
+-   2.7 Ethical issues in data sourcing and extraction
+
+#### 4. Analyse data to provide business intelligence
+
+-   4.7 Role of domain knowledge in interpreting analyses

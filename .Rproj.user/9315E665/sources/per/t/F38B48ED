@@ -1,0 +1,27 @@
+{
+    "id": "F38B48ED",
+    "path": "D:/UNIVERSITY/CodeClan/Newark_Delay_Project/scripts/primary_data_cleaning.R",
+    "project_path": "scripts/primary_data_cleaning.R",
+    "type": "r_source",
+    "hash": "10563017",
+    "contents": "",
+    "dirty": false,
+    "created": 1655947864741.0,
+    "source_on_save": false,
+    "relative_order": 2,
+    "properties": {
+        "tempName": "Untitled1",
+        "source_window_id": "",
+        "Source": "Source",
+        "cursorPosition": "33,85",
+        "scrollLine": "0"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 1654630466,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1654630466,
+    "read_only": false,
+    "read_only_alternatives": []
+}
